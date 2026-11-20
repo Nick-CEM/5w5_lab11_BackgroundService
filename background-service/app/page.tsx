@@ -27,7 +27,10 @@ export default function Home() {
 
   // TODO: Ajouter une variable nbWins
   // TODO: Ajouter 3 variables: Le multiplier, le multiplierCost, mais également le multiplierIntialCost pour remettre à jour multiplierCost après chaque fin de round (ou sinon on peut passer l'information dans l'appel qui vient du Hub!)
-
+  const [nbWins, setNbWins] = useState(0);
+  const [multiplier, setMultiplier] = useState(1);
+  const [multiplierCost, setMultiplierCost] = useState(0);
+  const [multiplierIntialCost, setMultiplierIntialCost] = useState(0);
 
   function connectToHub() {
     const newHubConnection = new HubConnectionBuilder()
@@ -46,13 +49,17 @@ export default function Home() {
       console.log("Réception de GameInfo: multiplierCost=" + data.multiplierCost + ", nbWins=" + data.nbWins);
       setIsConnected(true);
       // TODO: Mettre à jour les variables pour le coût du multiplier et le nbWins
+      setNbWins(data.nbWins)
     });
 
     newHubConnection.on('EndRound', (data:RoundResult) => {
       setNbClicks(0);
       // TODO: Reset du multiplierCost et le multiplier
 
+      let username = sessionStorage.getItem("username");
       // TODO: Si le joueur a gagné, on augmene nbWins
+      if(data.winners != null && data.winners.indexOf(username!) >= 0)
+        setNbWins(nbWins => nbWins + 1);
 
       if(data.nbClicks > 0){
         let phrase = " a gagné avec ";
@@ -107,7 +114,7 @@ export default function Home() {
     else{
       return (
         <div>
-          <div >Connecté! {/*TODO: Afficher le nb de wins*/}</div>
+          <div >Connecté! Vous avez eu {nbWins} victoires!</div>
           <br />
           <div>
             <Button className="mr-2" variant="default" onClick={Increment}>Cliquer</Button>
